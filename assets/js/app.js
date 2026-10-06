@@ -18,6 +18,7 @@ const genreControl = $('#genre');
 const movieRatingControl = $('#movieRating');
 const movieDateControl = $('#movieDate');
 const addMoviebtn = $('#addMoviebtn');
+const updateMoviebtn = $('#updateMoviebtn');
 const backdrop = $('#backdrop');
 const spinner = $('#spinner');
 const closeBtn = $('#closeBtn');
@@ -108,7 +109,7 @@ function onMovieCardCreate(eve) {
         descripation: movieDesciptionControl.value,
         genre: genreControl.value,
         rating: movieRatingControl.value,
-        createdDate: movieDateControl.value
+        createdDate: new Date(movieDateControl.value).toLocaleString(),
     }
     makeApiCall(MOVIE_URL, "POST", movieObj)
         .then(res => {
@@ -117,7 +118,7 @@ function onMovieCardCreate(eve) {
             state.movieArray.unshift(movieObj);
             let div = document.createElement('div');
             div.className = 'col-md-3 mt-3';
-            div.id = movieObj.id;
+            div.id = res.name;
             div.innerHTML = ` <div class="card movieCard">
                     <div class="card-header">
                         <div class="row">
@@ -178,7 +179,7 @@ fetchMovieCards();
 function templatingMovieCards(arr) {
     let result = '';
     arr.forEach(mov => {
-        result += ` <div class="col-md-3 mt-3">
+        result += ` <div class="col-md-3 mt-3" id="${mov.id}">
                 <div class="card movieCard">
                     <div class="card-header">
                         <div class="row">
@@ -202,8 +203,8 @@ function templatingMovieCards(arr) {
                         </figure>
                     </div>
                     <div class="card-footer d-flex justify-content-between">
-                        <button type="button" class="btn btn-sm net-sec-btn">Edit</button>
-                        <button type="button" class="btn btn-sm net-pri-btn">Remove</button>
+                        <button type="button" onclick="onEditMovie(this)" class="btn btn-sm net-sec-btn">Edit</button>
+                        <button type="button" onclick="onDeleteMovie(this)"  class="btn btn-sm net-pri-btn">Remove</button>
                     </div>
                 </div>
             </div> `
@@ -211,5 +212,36 @@ function templatingMovieCards(arr) {
     movieContainer.innerHTML = result;
 }
 //==================================================================================
+function onEditMovie(ele) {
+    let editId = ele.closest('.col-md-3').id
+    state.movieEditId = editId;
+    const EDIT_URL = `${BASE_URL}/movies1/${editId}.json`;
+    handleSpinner(true);
+    makeApiCall(EDIT_URL, 'GET')
+        .then(res => {
+            cl(res);
+            let oldDate = res.createdDate;
+            let [datePart] = oldDate.split(',');
+            // "14/10/2026"
+            let [day, month, year] = datePart.split('/');
+            // movieDate.value = `${year}-${month}-${day}`;
+            handleSpinner();
+            onToggle();
+            movieNameControl.value = res.name;
+            movieImageControl.value = res.image;
+            movieDesciptionControl.value = res.descripation;
+            movieRatingControl.value = res.rating;
+            genreControl.value = res.genre;
+            movieDateControl.value = `${year}-${month}-${day}`;
+            addMoviebtn.classList.add('d-none');
+            updateMoviebtn.classList.remove('d-none');
+            closeMark.classList.add('d-none');
+            closeBtn.disabled = true;
+            document.querySelector('#movieForm .card-header h3').innerText = 'Edit Movie'
+        })
 
-movieForm.addEventListener('submit', onMovieCardCreate)
+}
+//==================================================================================
+
+movieForm.addEventListener('submit', onMovieCardCreate);
+updateMoviebtn.addEventListener('click', onMovieUpdate);
