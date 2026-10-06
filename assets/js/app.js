@@ -242,6 +242,74 @@ function onEditMovie(ele) {
 
 }
 //==================================================================================
+function onMovieUpdate(eve) {
+    let updateId = state.movieEditId;
+    let editobj = state.movieArray.find(mov => mov.id === updateId);
+    cl(editobj);
+    cl(editobj.createdDate);
+    let updateMovObj = {
+        name: movieNameControl.value,
+        image: movieImageControl.value,
+        descripation: movieDesciptionControl.value,
+        genre: genreControl.value,
+        rating: movieRatingControl.value,
+        createdDate: editobj.createdDate,
+        updatedDate: new Date(movieDateControl.value).toLocaleString(),
+        id: updateId
+    }
+    cl(updateMovObj);
+    const UPDATE_URL = `${BASE_URL}/movies1/${updateId}.json`;
+    handleSpinner(true);
+    makeApiCall(UPDATE_URL, 'PATCH', updateMovObj)
+        .then(res => {
+            cl(res);
+            let getIndex = state.movieArray.findIndex(mov => mov.id === updateId)
+            state.movieArray[getIndex] = updateMovObj;
+            // state.movieEditId = null;
+            let div = document.getElementById(updateId);
+            cl(div);
+            div.innerHTML = `<div class="card movieCard">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-10">
+                                <h4>${updateMovObj.name}</h4>
+                                <p>Updated at : ${updateMovObj.updatedDate}</p>
+                            </div>
+                            <div class="col-2">
+                                <span class=" text-center p-2 ${movieRating(updateMovObj.rating)}">${updateMovObj.rating}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <figure>
+                            <img src="${updateMovObj.image}" alt="${updateMovObj.name}">
+                            <figcaption>
+                                <h4>${updateMovObj.name}</h4>
+                                <p>Genere : ${updateMovObj.genre}</p>
+                                <p>${updateMovObj.descripation}</p>
+                            </figcaption>
+                        </figure>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between">
+                        <button type="button" onclick="onEditMovie(this)" class="btn btn-sm net-sec-btn">Edit</button>
+                        <button type="button" onclick="onDeleteMovie(this)"  class="btn btn-sm net-pri-btn">Remove</button>
+                    </div>
+                </div>`
+            addMoviebtn.classList.remove('d-none');
+            updateMoviebtn.classList.add('d-none');
+            closeMark.classList.remove('d-none');
+            closeBtn.disabled = false;
+            document.querySelector('#movieForm .card-header h3').innerText = 'Add Movie'
+            handleSpinner()
+            snackBar('MovieCard Updated Successfully', 'success')
+            onToggle();
+        })
+        .catch(err => {
+            handleSpinner();
+            snackBar(`Unable to update movieCard`, 'error');
+        })
+}
+
 
 movieForm.addEventListener('submit', onMovieCardCreate);
 updateMoviebtn.addEventListener('click', onMovieUpdate);
