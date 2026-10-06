@@ -158,5 +158,58 @@ function onMovieCardCreate(eve) {
 
 }
 //====================================================================================
+function fetchMovieCards() {
+    handleSpinner(true);
+    makeApiCall(MOVIE_URL, "GET")
+        .then(res => {
+            state.movieArray = objtoArr(res);
+            templatingMovieCards(state.movieArray);
+            handleSpinner();
+            snackBar('MovieCards Fetched Successfully', 'success')
+
+        })
+        .catch(err => {
+            handleSpinner();
+            snackBar('unble to server connect', 'error');
+        })
+}
+fetchMovieCards();
+//====================================================================================
+function templatingMovieCards(arr) {
+    let result = '';
+    arr.forEach(mov => {
+        result += ` <div class="col-md-3 mt-3">
+                <div class="card movieCard">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-10">
+                                <h4>${mov.name}</h4>
+                                <p>Created at : ${mov.createdDate}</p>
+                            </div>
+                            <div class="col-2">
+                                <span class=" text-center p-2 ${movieRating(mov.rating)}">${mov.rating}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <figure>
+                            <img src="${mov.image}" alt="${mov.name}">
+                            <figcaption>
+                                <h4>${mov.name}</h4>
+                                <p>Genere : ${mov.genre}</p>
+                                <p>${mov.descripation}</p>
+                            </figcaption>
+                        </figure>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between">
+                        <button type="button" class="btn btn-sm net-sec-btn">Edit</button>
+                        <button type="button" class="btn btn-sm net-pri-btn">Remove</button>
+                    </div>
+                </div>
+            </div> `
+    })
+    movieContainer.innerHTML = result;
+}
+//==================================================================================
 
 movieForm.addEventListener('submit', onMovieCardCreate)
