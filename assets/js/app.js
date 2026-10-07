@@ -105,6 +105,7 @@ function onMovieCardCreate(eve) {
     eve.preventDefault();
     if(movieNameControl.value == '' || movieImageControl.value == '' || movieDesciptionControl.value == '' || movieRatingControl.value == '' || movieDateControl.value == ''){
         snackBar('Please fill all field');
+        return;
     }else{
     let movieObj = {
         name: movieNameControl.value,
