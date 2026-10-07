@@ -103,6 +103,9 @@ function makeApiCall(url, methodName, body) {
 //=====================================================================================
 function onMovieCardCreate(eve) {
     eve.preventDefault();
+    if(movieNameControl.value == '' || movieImageControl.value == '' || movieDesciptionControl.value == '' || movieRatingControl.value == '' || movieDateControl.value == ''){
+        snackBar('Please fill all field');
+    }else{
     let movieObj = {
         name: movieNameControl.value,
         image: movieImageControl.value,
@@ -157,7 +160,7 @@ function onMovieCardCreate(eve) {
             snackBar(`Unable to add movieCard`, 'error');
         })
 
-}
+}}
 //====================================================================================
 function fetchMovieCards() {
     handleSpinner(true);
@@ -309,7 +312,35 @@ function onMovieUpdate(eve) {
             snackBar(`Unable to update movieCard`, 'error');
         })
 }
+//===================================================================================
+function onDeleteMovie(ele) {
+    let deleteId = ele.closest('.col-md-3').id;
+    Swal.fire({
+        title: "Are you sure?",
+        text: `You want to delete employee ID ${deleteId}?`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, Delete",
+        cancelButtonText: "Cancel"
+    })
+        .then(function (result) {
+            if (result.isConfirmed) {
+                handleSpinner(true);
+                DELETE_URL = `${BASE_URL}/movies1/deleteId.json`;
+                makeApiCall(DELETE_URL, 'DELETE');
+                let findIndex = state.movieArray.findIndex(mov => mov.id === deleteId)
+                state.movieArray.splice(findIndex, 1);
+                ele.closest('.col-md-3').remove();
+                handleSpinner();
+                snackBar('Delete MovieCard Successfully!!', 'success');
+            }
+        })
+        .catch(err => {
+            handleSpinner();
+            snackBar(`Unable to delete student ID ${deleteId}`, 'error');
+        })
 
-
+}
+//========================================================================================
 movieForm.addEventListener('submit', onMovieCardCreate);
 updateMoviebtn.addEventListener('click', onMovieUpdate);
